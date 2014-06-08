@@ -1,7 +1,7 @@
 {
   "name": "svgfont2svgicons",
-  "version": "0.0.1",
-  "description": "Read a set of SVG icons and ouput a SVG font",
+  "version": "0.0.2",
+  "description": "Extract SVG icons from an SVG font",
   "homepage": "https://github.com/nfroidure/svgfont2svgicons",
   "main": "src/index.js",
   "scripts": {
@@ -31,8 +31,7 @@
     "mocha": "~1.20.0",
     "mocha-lcov-reporter": "0.0.1",
     "coveralls": "~2.10.0",
-    "istanbul": "~0.2.10",
-    "sax": "~0.6.0"
+    "istanbul": "~0.2.10"
   },
   "author": {
     "name": "Nicolas Froidure",

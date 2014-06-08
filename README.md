@@ -34,16 +34,10 @@ CLI (install the module globally):
 svgicons2svgfont font/src/file.svg icons/dest/directory
 ```
 
-## Options (not plugged to CLI yet)
+## Options
 
-### pipe
-Type: `String`
-Default value: `'iconfont'`
-The font family name you want.
-
-## Gulp plugins
-
-Try [gulp-svgfont2svgicons](https://github.com/nfroidure/gulp-svgfont2svgicons).
+Currently no options, feel free to suggest some in
+ [the issues](https://github.com/nfroidure/svgfont2svgicons/issues).
 
 ## Stats
 
