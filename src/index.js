@@ -116,6 +116,8 @@ function SVGFont2SVGIcons(options) {
         glyph.stream.queue(
           pathParser.pipe(new SVGPathData.Transformer(
             SVGPathData.Transformer.Y_AXIS_SIMETRY, glyph.height
+          )).pipe(new SVGPathData.Transformer(
+            SVGPathData.Transformer.TRANSLATE, 0, descent
           )).pipe(new SVGPathData.Encoder())
         );
         pathParser.write(d);
