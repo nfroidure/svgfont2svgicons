@@ -7,6 +7,7 @@ var svgfont2svgicons = require(__dirname + '/../src/index.js')
 
 var fontStream = Fs.createReadStream(process.argv[2]);
 var iconProvider = svgfont2svgicons();
+var unamedIconCount = 0;
 
 fontStream.pipe(iconProvider);
 
@@ -15,7 +16,10 @@ iconProvider.on('readable', function() {
   while(null !== glyph) {
     glyph = iconProvider.read();
     if(glyph) {
-      glyphPath = path.join(process.argv[3], glyph.name + '.svg');
+      glyphPath = path.join(
+        process.argv[3],
+        (glyph.name || 'icon' + (++unamedIconCount) + '.svg')
+      );
       console.log('Saving glyph "' + glyph.name + '" to "' + glyphPath + '"');
       glyph.stream.pipe(Fs.createWriteStream(glyphPath));
     }
