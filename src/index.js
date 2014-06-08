@@ -32,6 +32,7 @@ function SVGFont2SVGIcons(options) {
     , descent = 0
     , horizontalAdv = 0
     , glyph = null
+    , glyphCount = 0
     , d = ''
   ;
 
@@ -82,6 +83,8 @@ function SVGFont2SVGIcons(options) {
       };
       if('glyph-name' in tag.attributes) {
         glyph.name = tag.attributes['glyph-name'];
+      } else {
+        glyph.name = 'icon' + (++glyphCount);
       }
       if('horiz-adv-x' in tag.attributes) {
         glyph.width = tag.attributes['horiz-adv-x'];

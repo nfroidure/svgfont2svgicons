@@ -16,10 +16,7 @@ iconProvider.on('readable', function() {
   while(null !== glyph) {
     glyph = iconProvider.read();
     if(glyph) {
-      glyphPath = path.join(
-        process.argv[3],
-        (glyph.name || 'icon' + (++unamedIconCount) + '.svg')
-      );
+      glyphPath = path.join(process.argv[3], glyph.name + '.svg');
       console.log('Saving glyph "' + glyph.name + '" to "' + glyphPath + '"');
       glyph.stream.pipe(Fs.createWriteStream(glyphPath));
     }
