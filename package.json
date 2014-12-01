@@ -22,16 +22,16 @@
   ],
   "dependencies": {
     "sax": "0.6.x",
-    "svg-pathdata": "0.0.6",
-    "readable-stream": "^1.0.27-1",
+    "svg-pathdata": "1.0.0",
+    "readable-stream": "^1.0.33",
     "plexer": "0.0.3",
     "streamqueue": "^0.1.1"
   },
   "devDependencies": {
-    "mocha": "~1.20.0",
+    "mocha": "~2.0.1",
     "mocha-lcov-reporter": "0.0.1",
-    "coveralls": "~2.10.0",
-    "istanbul": "~0.2.10"
+    "coveralls": "~2.11.2",
+    "istanbul": "~0.3.2"
   },
   "author": {
     "name": "Nicolas Froidure",
