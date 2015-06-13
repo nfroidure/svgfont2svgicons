@@ -31,7 +31,7 @@ iconProvider.on('readable', function() {
 
 CLI (install the module globally):
 ```sh
-svgicons2svgfont font/src/file.svg icons/dest/directory
+svgfont2svgicons font/src/file.svg icons/dest/directory
 ```
 
 ## Options
