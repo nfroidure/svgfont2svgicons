@@ -8,33 +8,30 @@
 "use strict";
 
 // Required modules
-var Path = require("path")
-  , util = require("util")
-  , Stream = require("readable-stream")
-  , Sax = require("sax")
-  , SVGPathData = require("svg-pathdata")
-  , Plexer = require('plexer')
-  , StreamQueue = require('streamqueue')
-;
+var Path = require("path");
+var util = require("util");
+var Stream = require("readable-stream");
+var Sax = require("sax");
+var SVGPathData = require("svg-pathdata");
+var Plexer = require('plexer');
+var StreamQueue = require('streamqueue');
 
 // Inherit of stream duplexer
 util.inherits(SVGFont2SVGIcons, Plexer);
 
 // Constructor
 function SVGFont2SVGIcons(options) {
-  var inputStream = null
-    , outputStream = null
-    , saxStream = null
-    , pathParser = null
-    , startContent = null
-    , endContent = null
-    , ascent = 0
-    , descent = 0
-    , horizontalAdv = 0
-    , glyph = null
-    , glyphCount = 0
-    , d = ''
-  ;
+  var inputStream = null;
+  var outputStream = null;
+  var saxStream = null;
+  var pathParser = null;
+  var startContent = null;
+  var endContent = null;
+  var ascent = 0;
+  var descent = 0;
+  var horizontalAdv = 0;
+  var glyphCount = 0;
+  var d = '';
 
   // Ensure new were used
   if(!(this instanceof SVGFont2SVGIcons)) {
@@ -50,13 +47,14 @@ function SVGFont2SVGIcons(options) {
   Plexer.call(this, {
     objectMode: true
   }, inputStream, outputStream);
-  
+
   // Setting objectMode separately
   this._writableState.objectMode = false;
   this._readableState.objectMode = true;
 
   // Listening to new tags
   saxStream.on('opentag', function(tag) {
+    var stream = null;
     // Save the default sizes
     if('font' === tag.name) {
       if('horiz-adv-x' in tag.attributes) {
@@ -74,48 +72,48 @@ function SVGFont2SVGIcons(options) {
     // Detect glyphs
     if('glyph' === tag.name) {
       // Fill the glyph object
-      glyph = {
+      var stream = new StreamQueue();
+      stream.metadata = {
         name: '',
         codepoint: '',
         width: horizontalAdv,
-        height: Math.abs(descent) + ascent,
-        stream: new StreamQueue()
+        height: Math.abs(descent) + ascent
       };
       if('glyph-name' in tag.attributes) {
-        glyph.name = tag.attributes['glyph-name'];
+        stream.metadata.name = tag.attributes['glyph-name'];
       } else {
-        glyph.name = 'icon' + (++glyphCount);
+        stream.metadata.name = 'icon' + (++glyphCount);
       }
       if('horiz-adv-x' in tag.attributes) {
-        glyph.width = tag.attributes['horiz-adv-x'];
+        stream.metadata.width = tag.attributes['horiz-adv-x'];
       }
       if('unicode' in tag.attributes) {
-        glyph.codepoint = tag.attributes.unicode;
+        stream.metadata.unicode = [tag.attributes.unicode];
       }
       d = '';
       if('d' in tag.attributes) {
         d = tag.attributes.d;
       }
-      outputStream.write(glyph);
-      startContent = new Stream.PassThrough()
-      glyph.stream.queue(startContent);
+      outputStream.write(stream);
+      startContent = new Stream.PassThrough();
+      stream.queue(startContent);
       startContent.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\
 <svg\
    xmlns:svg="http://www.w3.org/2000/svg"\
    xmlns="http://www.w3.org/2000/svg"\
    version="1.1"\
-   width="' + glyph.width + '"\
-   height="' + glyph.height + '"\
-   viewBox="0 0 ' + glyph.width + ' ' + glyph.height + '">\
+   width="' + stream.metadata.width + '"\
+   height="' + stream.metadata.height + '"\
+   viewBox="0 0 ' + stream.metadata.width + ' ' + stream.metadata.height + '">\
   <path\
      d="');
       startContent.end();
       // Transform the glyph content
       if(d) {
         pathParser = new SVGPathData.Parser();
-        glyph.stream.queue(
+        stream.queue(
           pathParser.pipe(new SVGPathData.Transformer(
-            SVGPathData.Transformer.Y_AXIS_SIMETRY, glyph.height
+            SVGPathData.Transformer.Y_AXIS_SIMETRY, stream.metadata.height
           )).pipe(new SVGPathData.Transformer(
             SVGPathData.Transformer.TRANSLATE, 0, descent
           )).pipe(new SVGPathData.Encoder())
@@ -124,12 +122,12 @@ function SVGFont2SVGIcons(options) {
         pathParser.end();
       }
       endContent = new Stream.PassThrough()
-      glyph.stream.queue(endContent);
+      stream.queue(endContent);
       endContent.write('"\
-     id="' + glyph.name + '" />\
+     id="' + stream.metadata.name + '" />\
 </svg>');
       endContent.end();
-      glyph.stream.done();
+      stream.done();
     }
   });
 
@@ -140,4 +138,3 @@ function SVGFont2SVGIcons(options) {
 }
 
 module.exports = SVGFont2SVGIcons;
-

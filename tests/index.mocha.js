@@ -1,9 +1,8 @@
-var assert = require('assert')
-  , svgfont2svgicons = require(__dirname + '/../src/index.js')
-  , Fs = require('fs')
-  , StringDecoder = require('string_decoder').StringDecoder
-  , Path = require("path")
-;
+var assert = require('assert');
+var svgfont2svgicons = require(__dirname + '/../src/index.js');
+var Fs = require('fs');
+var StringDecoder = require('string_decoder').StringDecoder;
+var Path = require("path");
 
 // Tests
 describe('Parsing fonts', function() {
@@ -19,27 +18,27 @@ describe('Parsing fonts', function() {
 
     iconProvider.on('readable', function() {
       var icon;
+      var content = '';
       do {
         icon = iconProvider.read();
         if(icon) {
-          icon.content = '';
           icons.push(icons);
-          icon.stream.on('readable', (function(icon) {
+          icon.on('readable', (function(icon) {
             return function() {
               var chunk;
               do {
-                chunk = icon.stream.read();
+                chunk = icon.read();
                 if(chunk) {
-                  icon.content += chunk.toString('utf-8');
+                  content += chunk.toString('utf-8');
                 }
               } while(null !== chunk);
             };
           })(icon));
-          icon.stream.once('end', (function(icon) {
+          icon.once('end', (function(icon) {
             return function() {
               assert.equal(
-                Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.name + '.svg'),
-                icon.content
+                Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg'),
+                content
               );
               bufferedIcons++;
               if(ended && icons.length == bufferedIcons) {
