@@ -4,12 +4,13 @@
 [![NPM version](https://badge.fury.io/js/svgfont2svgicons.png)](https://npmjs.org/package/svgfont2svgicons) [![Build status](https://secure.travis-ci.org/nfroidure/svgfont2svgicons.png)](https://travis-ci.org/nfroidure/svgfont2svgicons) [![Dependency Status](https://david-dm.org/nfroidure/svgfont2svgicons.png)](https://david-dm.org/nfroidure/svgfont2svgicons) [![devDependency Status](https://david-dm.org/nfroidure/svgfont2svgicons/dev-status.png)](https://david-dm.org/nfroidure/svgfont2svgicons#info=devDependencies) [![Coverage Status](https://coveralls.io/repos/nfroidure/svgfont2svgicons/badge.png?branch=master)](https://coveralls.io/r/nfroidure/svgfont2svgicons?branch=master) [![Code Climate](https://codeclimate.com/github/nfroidure/svgfont2svgicons.png)](https://codeclimate.com/github/nfroidure/svgfont2svgicons)
 
 ## Usage
-NodeJS module:
+
+### In your scripts
 ```js
 var svgfont2svgicons = require('svgfont2svgicons');
 var fs = require('fs');
-var iconProvider = svgfont2svgicons(options);
 var fontStream = fs.createReadStream('myFont.svg');
+var iconProvider = svgfont2svgicons(options);
 
 // Piping the font
 fontStream.pipe(iconProvider);
@@ -20,16 +21,16 @@ iconProvider.on('readable', function() {
   do {
     icon = iconProvider.read();
     if(icon) {
-      console.log('New icon:', icon.name, icon.codepoint);
-      icon.stream.pipe(fs.createWriteStream(icon.name + '.svg'));
+      console.log('New icon:', icon.metadata.name, icon.metadata.unicode);
+      icon.pipe(fs.createWriteStream(icon.metadata.name + '.svg'));
     }
   } while(null !== icon);
-}).once('end',function() {
+}).once('end', function() {
   console.log('No more icons !')
 });
 ```
 
-CLI (install the module globally):
+## CLI interface
 ```sh
 svgicons2svgfont font/src/file.svg icons/dest/directory
 ```
