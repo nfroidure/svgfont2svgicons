@@ -3,56 +3,62 @@ var svgfont2svgicons = require(__dirname + '/../src/index.js');
 var Fs = require('fs');
 var StringDecoder = require('string_decoder').StringDecoder;
 var Path = require("path");
+var streamtest = require('streamtest');
 
 // Tests
 describe('Parsing fonts', function() {
 
-  it("should work for simple SVG fonts", function(done) {
-    var fontStream = Fs.createReadStream(__dirname + '/fixtures/cleanicons.svg');
-    var iconProvider = svgfont2svgicons();
-    var icons = [];
-    var bufferedIcons = 0;
-    var ended = false;
+  streamtest.versions.forEach(function(version) {
 
-    fontStream.pipe(iconProvider);
+    describe('for ' + version + ' streams', function() {
 
-    iconProvider.on('readable', function() {
-      var icon;
-      var content = '';
-      do {
-        icon = iconProvider.read();
-        if(icon) {
-          icons.push(icons);
-          icon.on('readable', (function(icon) {
-            return function() {
-              var chunk;
-              do {
-                chunk = icon.read();
-                if(chunk) {
-                  content += chunk.toString('utf-8');
+      it("should work for simple SVG fonts", function(done) {
+        var bufferedIcons = 0;
+        var ended = false;
+
+        Fs.createReadStream(__dirname + '/fixtures/cleanicons.svg')
+          .pipe(svgfont2svgicons())
+          .pipe(streamtest[version].toObjects(function(err, icons) {
+            if(err) {
+              return done(err);
+            }
+            assert.equal(icons.length, 10);
+            icons.forEach(function(icon, i) {
+              icon.pipe(streamtest[version].toChunks(function(err, chunks) {
+                assert.equal(
+                  chunks.reduce(function(content, chunk) {
+                    return content + chunk.toString('utf-8');
+                  }, ''),
+                  Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg')
+                );
+                bufferedIcons++;
+                if(bufferedIcons == icons.length) {
+                  done();
                 }
-              } while(null !== chunk);
-            };
-          })(icon));
-          icon.once('end', (function(icon) {
-            return function() {
-              assert.equal(
-                Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg'),
-                content
-              );
-              bufferedIcons++;
-              if(ended && icons.length == bufferedIcons) {
-                done();
-              }
-            };
-          })(icon));
-        }
-      } while(null !== icon);
-    }).once('end',function() {
-      ended = true;
-      if(icons.length == bufferedIcons) {
-        done();
-      }
+              }));
+            });
+          }));
+      });
+
+      it("should be reentrant with svgicons2svgfont", function(done) {
+        var svgicons2svgfont = require('svgicons2svgfont');
+
+        Fs.createReadStream(__dirname + '/fixtures/cleanicons2.svg')
+          .pipe(svgfont2svgicons())
+          .pipe(svgicons2svgfont({
+            fontName: 'Plop'
+          }))
+          .pipe(streamtest[version].toChunks(function(err, chunks) {
+            assert.equal(
+              chunks.reduce(function(content, chunk) {
+                return content + chunk.toString('utf-8');
+              }, ''),
+              Fs.readFileSync(__dirname + '/fixtures/cleanicons2.svg')
+            );
+            done();
+          }));
+      });
+
     });
 
   });

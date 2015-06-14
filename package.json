@@ -28,10 +28,12 @@
     "streamqueue": "^1.1.0"
   },
   "devDependencies": {
+    "coveralls": "~2.11.2",
+    "istanbul": "~0.3.15",
     "mocha": "~2.2.5",
     "mocha-lcov-reporter": "0.0.2",
-    "coveralls": "~2.11.2",
-    "istanbul": "~0.3.15"
+    "streamtest": "^1.2.0",
+    "svgicons2svgfont": "^2.0.2"
   },
   "author": {
     "name": "Nicolas Froidure",
