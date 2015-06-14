@@ -32,7 +32,7 @@ iconProvider.on('readable', function() {
 
 ## CLI interface
 ```sh
-svgicons2svgfont font/src/file.svg icons/dest/directory
+svgfont2svgicons font/src/file.svg icons/dest/directory
 ```
 
 ## Options
