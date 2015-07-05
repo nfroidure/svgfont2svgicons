@@ -32,6 +32,7 @@ function SVGFont2SVGIcons(options) {
   var horizontalAdv = 0;
   var glyphCount = 0;
   var d = '';
+  options = options || {};
 
   // Ensure new were used
   if(!(this instanceof SVGFont2SVGIcons)) {
@@ -89,6 +90,9 @@ function SVGFont2SVGIcons(options) {
       }
       if('unicode' in tag.attributes) {
         stream.metadata.unicode = [tag.attributes.unicode];
+        if(options.nameMap && tag.attributes.unicode in options.nameMap) {
+          stream.metadata.name = options.nameMap[tag.attributes.unicode];
+        }
       }
       d = '';
       if('d' in tag.attributes) {

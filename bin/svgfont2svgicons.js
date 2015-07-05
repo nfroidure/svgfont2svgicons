@@ -2,58 +2,39 @@
 
 var svgfont2svgicons = require(__dirname + '/../src/index.js'),
   Fs = require('fs'),
-  path = require('path');
+  path = require('path'),
+  program = require('commander');
 
-var srcFile,
-  destPath,
-  options = {};
+program
+  .version('2.0.0')
+  .usage('[options] <font file> <destination path>')
+  .option('--namemap <json file>', 'get unicode to name map from json file', '')
+  .parse(process.argv);
 
-for (var i = 2; i < process.argv.length; i++) {
-  switch (process.argv[i]) {
-    case '--namemap':
-      options.namemap = JSON.parse(Fs.readFileSync(process.argv[++i]));
-      break;
-    case '--help':
-    case '--usage':
-      console.log([
-        'node ' + process.argv[2] + ' <source svg file> <destination path>',
-        '  --namemap <json file>'
-      ].join('\n'));
-      break;
-    default:
-      if (!srcFile)
-        srcFile = process.argv[i];
-      else if (!destPath)
-        destPath = process.argv[i];
-  }
+if (program.args.length < 2) {
+  console.log('Usage: node svgfont2svgicons', program.usage());
+  process.exit(1);
 }
 
-if (!srcFile || !destPath)
-  console.log('see --usage');
+var srcFile = program.args[0],
+  destPath = program.args[1],
+  options = {};
+
+if (program.namemap)
+  options.nameMap = JSON.parse(Fs.readFileSync(program.namemap));
 
 var fontStream = Fs.createReadStream(srcFile);
-var iconProvider = svgfont2svgicons();
-var unamedIconCount = 0;
+var iconProvider = svgfont2svgicons(options);
 
 fontStream.pipe(iconProvider);
 
 iconProvider.on('readable', function() {
   var glyph;
   while((glyph = iconProvider.read()) !== null) {
-    var glyphName = glyph.name,
+    var glyphName = glyph.metadata.name,
       readableHex = glyph.metadata.unicode.map(function(str) {
         return '\\u' + str.charCodeAt(0).toString(16).toUpperCase();
       }).join('');
-
-    if (options.namemap) {
-      var unicode = glyph.metadata.unicode.join('');
-      glyphName = options.namemap[unicode];
-    }
-
-    if (!glyphName) {
-      console.log('Missing glyph name for unicode', readableHex);
-      continue;
-    }
 
     var glyphPath = path.join(destPath, glyphName + '.svg');
     console.log('Saving glyph "' + glyphName + '" to "' + glyphPath + '"');

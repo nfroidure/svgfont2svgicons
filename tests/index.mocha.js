@@ -4,6 +4,7 @@ var Fs = require('fs');
 var StringDecoder = require('string_decoder').StringDecoder;
 var Path = require("path");
 var streamtest = require('streamtest');
+var async = require('async');
 
 // Tests
 describe('Parsing fonts', function() {
@@ -23,20 +24,21 @@ describe('Parsing fonts', function() {
               return done(err);
             }
             assert.equal(icons.length, 10);
-            icons.forEach(function(icon, i) {
-              icon.pipe(streamtest[version].toChunks(function(err, chunks) {
-                assert.equal(
-                  chunks.reduce(function(content, chunk) {
-                    return content + chunk.toString('utf-8');
-                  }, ''),
-                  Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg')
-                );
-                bufferedIcons++;
-                if(bufferedIcons == icons.length) {
-                  done();
-                }
-              }));
-            });
+            async.each(
+              icons,
+              function(icon, cb) {
+                icon.pipe(streamtest[version].toChunks(function(err, chunks) {
+                  assert.equal(
+                    chunks.reduce(function(content, chunk) {
+                      return content + chunk.toString('utf-8');
+                    }, ''),
+                    Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg')
+                  );
+                  cb(err);
+                }));
+              },
+              done
+            );
           }));
       });
 
@@ -56,6 +58,36 @@ describe('Parsing fonts', function() {
               Fs.readFileSync(__dirname + '/fixtures/cleanicons2.svg')
             );
             done();
+          }));
+      });
+
+      it("should support namemaps", function(done) {
+        Fs.createReadStream(__dirname + '/fixtures/cleaniconsWithoutNames.svg')
+          .pipe(svgfont2svgicons({
+            nameMap: JSON.parse(Fs.readFileSync(__dirname + '/fixtures/cleaniconsNameMap.json'))
+          }))
+          .pipe(streamtest[version].toObjects(function(err, icons) {
+            if(err) {
+              return done(err);
+            }
+            assert.equal(icons.length, 10);
+            async.each(
+              icons,
+              function(icon, cb) {
+                icon.pipe(streamtest[version].toChunks(function(err, chunks) {
+                  // Check if the name is not the fallback form
+                  assert.notEqual(icon.metadata.name, /icon\d+/);
+                  assert.equal(
+                    chunks.reduce(function(content, chunk) {
+                      return content + chunk.toString('utf-8');
+                    }, ''),
+                    Fs.readFileSync(__dirname + '/expected/cleanicons/' + icon.metadata.name + '.svg')
+                  );
+                  cb(err);
+                }));
+              },
+              done
+            );
           }));
       });
 
