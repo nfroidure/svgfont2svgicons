@@ -3,9 +3,10 @@
 
 [![NPM version](https://badge.fury.io/js/svgfont2svgicons.png)](https://npmjs.org/package/svgfont2svgicons) [![Build status](https://secure.travis-ci.org/nfroidure/svgfont2svgicons.png)](https://travis-ci.org/nfroidure/svgfont2svgicons) [![Dependency Status](https://david-dm.org/nfroidure/svgfont2svgicons.png)](https://david-dm.org/nfroidure/svgfont2svgicons) [![devDependency Status](https://david-dm.org/nfroidure/svgfont2svgicons/dev-status.png)](https://david-dm.org/nfroidure/svgfont2svgicons#info=devDependencies) [![Coverage Status](https://coveralls.io/repos/nfroidure/svgfont2svgicons/badge.png?branch=master)](https://coveralls.io/r/nfroidure/svgfont2svgicons?branch=master) [![Code Climate](https://codeclimate.com/github/nfroidure/svgfont2svgicons.png)](https://codeclimate.com/github/nfroidure/svgfont2svgicons)
 
-## Usage
+## Usage
 
 ### In your scripts
+
 ```js
 var svgfont2svgicons = require('svgfont2svgicons');
 var fs = require('fs');
@@ -30,7 +31,8 @@ iconProvider.on('readable', function() {
 });
 ```
 
-## CLI interface
+## CLI interface
+
 ```sh
 svgfont2svgicons font/src/file.svg icons/dest/directory
 ```
@@ -46,5 +48,5 @@ Currently no options, feel free to suggest some in
 [![NPM](https://nodei.co/npm-dl/svgfont2svgicons.png)](https://nodei.co/npm/svgicon2svgfont/)
 
 ## Contributing
-Feel free to pull your code if you agree with publishing under the MIT license.
 
+Feel free to pull your code if you agree with publishing under the MIT license.
