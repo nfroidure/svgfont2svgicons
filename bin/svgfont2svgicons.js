@@ -1,44 +1,43 @@
 #! /usr/bin/env node
 
-var svgfont2svgicons = require(__dirname + '/../src/index.js'),
-  Fs = require('fs'),
-  path = require('path'),
-  program = require('commander');
+import { SVGFont2SVGIconsStream } from '../dist/index.js';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { argv, exit } from 'node:process';
+import program from 'commander';
 
 program
   .version('2.0.0')
   .usage('[options] <font file> <destination path>')
   .option('--namemap <json file>', 'get unicode to name map from json file', '')
-  .parse(process.argv);
+  .parse(argv);
 
 if (program.args.length < 2) {
   console.log('Usage: node svgfont2svgicons', program.usage());
-  process.exit(1);
+  exit(1);
 }
 
-var srcFile = program.args[0],
+const srcFile = program.args[0],
   destPath = program.args[1],
   options = {};
 
 if (program.namemap)
-  options.nameMap = JSON.parse(Fs.readFileSync(program.namemap));
+  options.nameMap = JSON.parse(await readFile(program.namemap));
 
-var fontStream = Fs.createReadStream(srcFile);
-var iconProvider = svgfont2svgicons(options);
+const fontStream = createReadStream(srcFile);
+const iconProvider = new SVGFont2SVGIconsStream(options);
 
 fontStream.pipe(iconProvider);
 
-iconProvider.on('readable', function() {
-  var glyph;
-  while((glyph = iconProvider.read()) !== null) {
-    var glyphName = glyph.metadata.name,
-      readableHex = glyph.metadata.unicode.map(function(str) {
-        return '\\u' + str.charCodeAt(0).toString(16).toUpperCase();
-      }).join('');
+iconProvider.on('readable', function () {
+  let glyph;
+  while ((glyph = iconProvider.read()) !== null) {
+    const glyphName = glyph.metadata.name;
+    const glyphPath = join(destPath, glyphName + '.svg');
 
-    var glyphPath = path.join(destPath, glyphName + '.svg');
     console.log('Saving glyph "' + glyphName + '" to "' + glyphPath + '"');
-    glyph.pipe(Fs.createWriteStream(glyphPath));
+    glyph.pipe(createWriteStream(glyphPath));
   }
 });
 
